@@ -1,6 +1,5 @@
 "use client"
 import ConfigForm from "@/components/ConfigForm"
-import PhoneCallForm from "@/components/PhoneCallForm"
 import { useRetellConfig } from "@/hooks/useRetellConfig"
 import { Toaster } from "sonner"
 
