@@ -1,36 +1,40 @@
-
 import { toast } from "sonner";
 import { RetellConfig, PhoneCallRequest } from "@/types";
 
-export const makePhoneCall = async (toNumber: string): Promise<boolean> => {
-  const apiKey = process.env.RETELL_API_KEY;
-  const fromNumber = process.env.RETELL_CALLER_NUMBER;
-  const agentId = process.env.RETELL_AGENT_ID;
+export const makePhoneCall = async (
+  phoneNumber: string,
+  patientName: string,
+  agentId: string
+): Promise<boolean> => {
+  console.log('makePhoneCall service - raw agentId:', agentId);
+  console.log('makePhoneCall service - typeof agentId:', typeof agentId);
+  
+  const payload = {
+    toNumber: phoneNumber,
+    patientName: patientName,
+    agentId: agentId
+  };
+  console.log('makePhoneCall service - payload:', payload);
 
-  if (!apiKey || !fromNumber || !agentId) {
-    console.error("Missing Retell API env variables");
+  try {
+    const response = await fetch('/api/make-call', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    console.log('makePhoneCall service - response:', data);
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Call failed');
+    }
+
+    return data.success;
+  } catch (error) {
+    console.error('Error in makePhoneCall:', error);
     return false;
   }
-
-  const requestData = {
-    from_number: fromNumber,
-    to_number: toNumber,
-    override_agent_id: agentId,
-  };
-
-  const response = await fetch("https://api.retellai.com/v2/create-phone-call", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestData),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Call failed");
-  }
-
-  return true;
 };

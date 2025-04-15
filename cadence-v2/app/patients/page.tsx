@@ -1,65 +1,52 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Grid, List, Phone, Plus, Search } from "lucide-react"
-import { Sidebar } from "@/components/sidebar"
-import { AddPatientModal } from "@/components/add-patient-modal"
-import { CallSimulationModal } from "@/components/call-simulation-modal"
-import { useRetellConfig } from "@/hooks/useRetellConfig"
-import { makePhoneCall } from "@/services/retellService"
-import { toast } from "sonner"
-import { Toaster } from "sonner"
+import { useState } from "react";
+import { Grid, List, Phone, Plus, Search } from "lucide-react";
+import { Sidebar } from "@/components/sidebar";
+import { AddPatientModal } from "@/components/add-patient-modal";
+import { CallSimulationModal } from "@/components/call-simulation-modal";
+import { useRetellConfig } from "@/hooks/useRetellConfig";
+import { makePhoneCall } from "@/services/retellService";
+import { toast } from "sonner";
+import { Toaster } from "sonner";
+import { usePatientStore } from "@/stores/patientStore";
 
 type Patient = {
-  id: string
-  name: string
-  status: "Completed" | "Active" | "Draft" | "Called"
-  dob: number | string
-  phoneNumber: string
-  callsCompleted: string
-  successRate: string
-}
+  id: string;
+  name: string;
+  status: "Completed" | "Active" | "Draft" | "Called";
+  dob: number | string;
+  phoneNumber: string;
+  callsCompleted: string;
+  successRate: string;
+};
 
 type Flag = {
-  id: string
-  patientName: string
-  message: string
-  priority: "High" | "Moderate" | "Low"
-}
+  id: string;
+  patientName: string;
+  message: string;
+  priority: "High" | "Moderate" | "Low";
+};
+
+// Move this outside the component
+const CALL_TEMPLATES = [
+  {
+    id: "direct_call",
+    name: "Direct Patient Call",
+    description: "Short, friendly check-in call with the patient",
+    agentId: "agent_af8d7952b291c293b87a9f6ad8", // Maya's agent ID
+  },
+];
 
 export default function PatientsPage() {
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [callPatient, setCallPatient] = useState<Patient | null>(null)
-  const { config, hasConfig } = useRetellConfig()
-  const [patients, setPatients] = useState<Patient[]>([
-    {
-      id: "1",
-      name: "John Doe",
-      status: "Completed",
-      dob: 132,
-      phoneNumber: "(555) 123-4567",
-      callsCompleted: "127/132",
-      successRate: "96%",
-    },
-    {
-      id: "2",
-      name: "John Doe",
-      status: "Active",
-      dob: 132,
-      phoneNumber: "(555) 234-5678",
-      callsCompleted: "22/132",
-      successRate: "57%",
-    },
-    {
-      id: "3",
-      name: "John Doe",
-      status: "Draft",
-      dob: 0,
-      phoneNumber: "(555) 345-6789",
-      callsCompleted: "-",
-      successRate: "-",
-    },
-  ])
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [callPatient, setCallPatient] = useState<Patient | null>(null);
+  const { config, hasConfig } = useRetellConfig();
+  const { setPatients } = usePatientStore();
+
+  // Remove the useEffect that sets initial data
+  // Instead, just get patients from the store
+  const patients = usePatientStore((state) => state.patients);
 
   const [flags, setFlags] = useState<Flag[]>([
     {
@@ -86,12 +73,12 @@ export default function PatientsPage() {
       message: "John Doe has missed 3 appointments in the past month.",
       priority: "High",
     },
-  ])
+  ]);
 
   // Function to add a new patient
   const handleAddPatient = (patientData: {
-    name: string
-    phoneNumber: string
+    name: string;
+    phoneNumber: string;
   }) => {
     const newPatient: Patient = {
       id: Date.now().toString(),
@@ -101,11 +88,11 @@ export default function PatientsPage() {
       phoneNumber: patientData.phoneNumber,
       callsCompleted: "0/0",
       successRate: "0%",
-    }
+    };
 
-    setPatients([newPatient, ...patients])
-    setShowAddModal(false)
-  }
+    setPatients([newPatient, ...patients]);
+    setShowAddModal(false);
+  };
 
   // Function to handle call completion
   const handleCallComplete = (accepted: boolean) => {
@@ -114,57 +101,83 @@ export default function PatientsPage() {
       setPatients(
         patients.map((patient) => {
           if (patient.id === callPatient.id) {
-            const [completed, total] = patient.callsCompleted.split("/")
-            const newCompleted = completed !== "-" ? Number.parseInt(completed) + 1 : 1
-            const newTotal = total !== "-" ? Number.parseInt(total) + 1 : 1
-            const successRate = Math.round((newCompleted / newTotal) * 100) + "%"
+            const [completed, total] = patient.callsCompleted.split("/");
+            const newCompleted =
+              completed !== "-" ? Number.parseInt(completed) + 1 : 1;
+            const newTotal = total !== "-" ? Number.parseInt(total) + 1 : 1;
+            const successRate =
+              Math.round((newCompleted / newTotal) * 100) + "%";
 
             return {
               ...patient,
               status: "Called",
               callsCompleted: `${newCompleted}/${newTotal}`,
               successRate,
-            }
+            };
           }
-          return patient
-        }),
-      )
+          return patient;
+        })
+      );
     }
-    setCallPatient(null)
-  }
+    setCallPatient(null);
+  };
 
   // Function to make a direct Retell call
   const handleDirectCall = async (patient: Patient) => {
     if (!hasConfig) {
-      toast.error("Retell API not configured. Please configure it in the settings.")
-      return
+      toast.error(
+        "Retell API not configured. Please configure it in the settings."
+      );
+      return;
     }
 
-    const success = await makePhoneCall(patient.phoneNumber)
-    if (success) {
-      toast.success(`Call initiated to ${patient.name} at ${patient.phoneNumber}`)
+    console.log("Making direct call for patient:", patient.name);
 
-      // Update patient status
-      setPatients(
-        patients.map((p) => {
-          if (p.id === patient.id) {
-            const [completed, total] = p.callsCompleted.split("/")
-            const newCompleted = completed !== "-" ? Number.parseInt(completed) + 1 : 1
-            const newTotal = total !== "-" ? Number.parseInt(total) + 1 : 1
-            const successRate = Math.round((newCompleted / newTotal) * 100) + "%"
-
-            return {
-              ...p,
-              status: "Called",
-              callsCompleted: `${newCompleted}/${newTotal}`,
-              successRate,
-            }
-          }
-          return p
+    try {
+      const response = await fetch("/api/make-call", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          toNumber: patient.phoneNumber,
+          patientName: patient.name,
+          agentId: "agent_af8d7952b291c293b87a9f6ad8",
         }),
-      )
+      });
+
+      if (response.ok) {
+        toast.success(
+          `Call initiated to ${patient.name} at ${patient.phoneNumber}`
+        );
+
+        // Update patient status
+        setPatients(
+          patients.map((p) => {
+            if (p.id === patient.id) {
+              const [completed, total] = p.callsCompleted.split("/");
+              const newCompleted =
+                completed !== "-" ? Number.parseInt(completed) + 1 : 1;
+              const newTotal = total !== "-" ? Number.parseInt(total) + 1 : 1;
+              const successRate =
+                Math.round((newCompleted / newTotal) * 100) + "%";
+
+              return {
+                ...p,
+                status: "Called",
+                callsCompleted: `${newCompleted}/${newTotal}`,
+                successRate,
+              };
+            }
+            return p;
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Failed to initiate call:", error);
+      toast.error("Failed to initiate call");
     }
-  }
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -180,7 +193,10 @@ export default function PatientsPage() {
               <h1 className="text-xl font-semibold">Patients</h1>
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <Search
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
                   <input
                     type="text"
                     placeholder="Search patients..."
@@ -199,9 +215,15 @@ export default function PatientsPage() {
 
             <div className="mb-6 flex justify-between items-center">
               <div className="flex">
-                <button className="px-4 py-2 text-sm font-medium bg-gray-200 rounded-l-md">All Patients</button>
-                <button className="px-4 py-2 text-sm font-medium text-gray-500 border-y border-r">Active</button>
-                <button className="px-4 py-2 text-sm font-medium text-gray-500 border-y border-r">Inactive</button>
+                <button className="px-4 py-2 text-sm font-medium bg-gray-200 rounded-l-md">
+                  All Patients
+                </button>
+                <button className="px-4 py-2 text-sm font-medium text-gray-500 border-y border-r">
+                  Active
+                </button>
+                <button className="px-4 py-2 text-sm font-medium text-gray-500 border-y border-r">
+                  Inactive
+                </button>
                 <button className="px-4 py-2 text-sm font-medium text-gray-500 border-y border-r rounded-r-md">
                   Drafts
                 </button>
@@ -239,10 +261,10 @@ export default function PatientsPage() {
                             patient.status === "Active"
                               ? "bg-blue-100 text-blue-800"
                               : patient.status === "Completed"
-                                ? "bg-teal-100 text-teal-800"
-                                : patient.status === "Called"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-gray-100 text-gray-800"
+                              ? "bg-teal-100 text-teal-800"
+                              : patient.status === "Called"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {patient.status}
@@ -281,12 +303,16 @@ export default function PatientsPage() {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">Flags & Warnings</h2>
-              <button className="px-3 py-1 border rounded-md text-sm">View All</button>
+              <button className="px-3 py-1 border rounded-md text-sm">
+                View All
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <div className="mb-2 px-2 py-1 bg-gray-100 rounded-md inline-block text-sm">High Priority</div>
+                <div className="mb-2 px-2 py-1 bg-gray-100 rounded-md inline-block text-sm">
+                  High Priority
+                </div>
                 <div className="space-y-3">
                   {flags
                     .filter((flag) => flag.priority === "High")
@@ -299,7 +325,9 @@ export default function PatientsPage() {
               </div>
 
               <div>
-                <div className="mb-2 px-2 py-1 bg-gray-100 rounded-md inline-block text-sm">Moderate Priority</div>
+                <div className="mb-2 px-2 py-1 bg-gray-100 rounded-md inline-block text-sm">
+                  Moderate Priority
+                </div>
                 <div className="space-y-3">
                   {flags
                     .filter((flag) => flag.priority === "Moderate")
@@ -312,7 +340,9 @@ export default function PatientsPage() {
               </div>
 
               <div>
-                <div className="mb-2 px-2 py-1 bg-gray-100 rounded-md inline-block text-sm">Low Priority</div>
+                <div className="mb-2 px-2 py-1 bg-gray-100 rounded-md inline-block text-sm">
+                  Low Priority
+                </div>
                 <div className="space-y-3">
                   {flags
                     .filter((flag) => flag.priority === "Low")
@@ -328,7 +358,12 @@ export default function PatientsPage() {
         </div>
       </div>
 
-      {showAddModal && <AddPatientModal onClose={() => setShowAddModal(false)} onAddPatient={handleAddPatient} />}
+      {showAddModal && (
+        <AddPatientModal
+          onClose={() => setShowAddModal(false)}
+          onAddPatient={handleAddPatient}
+        />
+      )}
 
       {callPatient && (
         <CallSimulationModal
@@ -339,5 +374,5 @@ export default function PatientsPage() {
         />
       )}
     </div>
-  )
+  );
 }

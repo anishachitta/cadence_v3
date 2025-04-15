@@ -1,22 +1,44 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Grid, List, Plus, Search } from "lucide-react"
-import { NewProtocolModal } from "@/components/new-protocol-modal"
-import { Sidebar } from "@/components/sidebar"
+import { useState } from "react";
+import { Grid, List, Plus, Search } from "lucide-react";
+import { NewProtocolModal } from "@/components/new-protocol-modal";
+import { Sidebar } from "@/components/sidebar";
+import { makePhoneCall } from "@/services/retellService";
+import { usePatientStore } from "@/stores/patientStore";
 
 // Define protocol type
 type Protocol = {
-  id: string
-  name: string
-  status: "Active" | "Completed" | "Draft"
-  patientsEnrolled: number
-  callsCompleted: string
-  successRate: string
-}
+  id: string;
+  name: string;
+  status: "Active" | "Completed" | "Draft";
+  patientsEnrolled: number;
+  callsCompleted: string;
+  successRate: string;
+  agentId: string;
+  patientIds: string[];
+};
+
+// Add this type and function near the top of the file
+type PatientDetails = {
+  id: string;
+  phoneNumber: string;
+  name: string;
+};
+
+const getPatientDetails = async (
+  patientIds: string[]
+): Promise<PatientDetails[]> => {
+  // Replace this with your actual patient data fetch logic
+  const response = await fetch("/api/patients", {
+    method: "POST",
+    body: JSON.stringify({ patientIds }),
+  });
+  return response.json();
+};
 
 export default function ActiveProtocols() {
-  const [showModal, setShowModal] = useState(false)
+  const [showModal, setShowModal] = useState(false);
   // Initialize with existing protocols
   const [protocols, setProtocols] = useState<Protocol[]>([
     {
@@ -26,6 +48,8 @@ export default function ActiveProtocols() {
       patientsEnrolled: 132,
       callsCompleted: "127/132",
       successRate: "96%",
+      agentId: "agent_onboarding_123",
+      patientIds: ["patient_1", "patient_2", "patient_3"],
     },
     {
       id: "2",
@@ -34,6 +58,8 @@ export default function ActiveProtocols() {
       patientsEnrolled: 132,
       callsCompleted: "22/132",
       successRate: "57%",
+      agentId: "agent_followup_456",
+      patientIds: ["patient_4", "patient_5", "patient_6"],
     },
     {
       id: "3",
@@ -42,14 +68,18 @@ export default function ActiveProtocols() {
       patientsEnrolled: 0,
       callsCompleted: "-",
       successRate: "-",
+      agentId: "",
+      patientIds: [],
     },
-  ])
+  ]);
 
   // Function to add a new protocol
   const handleAddProtocol = (protocolData: {
-    name: string
-    template: string
-    patientCount: number
+    name: string;
+    template: string;
+    patientCount: number;
+    agentId: string;
+    patientIds: string[];
   }) => {
     const newProtocol: Protocol = {
       id: Date.now().toString(),
@@ -58,11 +88,66 @@ export default function ActiveProtocols() {
       patientsEnrolled: protocolData.patientCount,
       callsCompleted: `0/${protocolData.patientCount}`,
       successRate: "0%",
-    }
+      agentId: protocolData.agentId,
+      patientIds: protocolData.patientIds,
+    };
 
-    setProtocols([newProtocol, ...protocols])
-    setShowModal(false)
-  }
+    setProtocols([newProtocol, ...protocols]);
+
+    // Initiate calls for all selected patients
+    initiateProtocolCalls(newProtocol);
+
+    setShowModal(false);
+  };
+
+  // Add this function to handle the automatic calling
+  const initiateProtocolCalls = async (protocol: Protocol) => {
+    try {
+      const patients = usePatientStore.getState().patients;
+      const selectedPatients = patients.filter((p) =>
+        protocol.patientIds.includes(p.id)
+      );
+
+      for (const patient of selectedPatients) {
+        const response = await fetch("/api/make-call", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            toNumber: patient.phoneNumber,
+            patientName: patient.name,
+            agentId: protocol.agentId,
+          }),
+        });
+
+        if (response.ok) {
+          // Update protocol stats similar to how patient stats are updated
+          setProtocols((currentProtocols) =>
+            currentProtocols.map((p) => {
+              if (p.id === protocol.id) {
+                const [completed, total] = p.callsCompleted.split("/");
+                const newCompleted =
+                  completed !== "-" ? Number.parseInt(completed) + 1 : 1;
+                const newTotal = total !== "-" ? Number.parseInt(total) : 1;
+                const successRate =
+                  Math.round((newCompleted / newTotal) * 100) + "%";
+
+                return {
+                  ...p,
+                  callsCompleted: `${newCompleted}/${newTotal}`,
+                  successRate,
+                };
+              }
+              return p;
+            })
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to initiate calls:", error);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -75,7 +160,10 @@ export default function ActiveProtocols() {
             <h1 className="text-xl font-semibold">Active Protocols</h1>
             <div className="flex items-center gap-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                <Search
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={16}
+                />
                 <input
                   type="text"
                   placeholder="Search your protocols..."
@@ -83,7 +171,14 @@ export default function ActiveProtocols() {
                 />
               </div>
               <button className="p-2 border rounded-md">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M4 6h16M4 12h16M4 18h7" />
                 </svg>
               </button>
@@ -99,10 +194,18 @@ export default function ActiveProtocols() {
 
           <div className="mb-6">
             <div className="flex border-b">
-              <button className="px-4 py-2 text-sm font-medium border-b-2 border-gray-900">All Protocols</button>
-              <button className="px-4 py-2 text-sm font-medium text-gray-500">Active</button>
-              <button className="px-4 py-2 text-sm font-medium text-gray-500">Completed</button>
-              <button className="px-4 py-2 text-sm font-medium text-gray-500">Drafts</button>
+              <button className="px-4 py-2 text-sm font-medium border-b-2 border-gray-900">
+                All Protocols
+              </button>
+              <button className="px-4 py-2 text-sm font-medium text-gray-500">
+                Active
+              </button>
+              <button className="px-4 py-2 text-sm font-medium text-gray-500">
+                Completed
+              </button>
+              <button className="px-4 py-2 text-sm font-medium text-gray-500">
+                Drafts
+              </button>
               <div className="ml-auto flex">
                 <button className="p-2 border-r bg-gray-100">
                   <List size={16} />
@@ -135,8 +238,8 @@ export default function ActiveProtocols() {
                           protocol.status === "Active"
                             ? "bg-blue-100 text-blue-800"
                             : protocol.status === "Completed"
-                              ? "bg-teal-100 text-teal-800"
-                              : "bg-gray-100 text-gray-800"
+                            ? "bg-teal-100 text-teal-800"
+                            : "bg-gray-100 text-gray-800"
                         }`}
                       >
                         {protocol.status}
@@ -153,7 +256,12 @@ export default function ActiveProtocols() {
         </div>
       </div>
 
-      {showModal && <NewProtocolModal onClose={() => setShowModal(false)} onAddProtocol={handleAddProtocol} />}
+      {showModal && (
+        <NewProtocolModal
+          onClose={() => setShowModal(false)}
+          onAddProtocol={handleAddProtocol}
+        />
+      )}
     </div>
-  )
+  );
 }

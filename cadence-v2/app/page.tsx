@@ -1,7 +1,21 @@
-import { Search } from "lucide-react"
-import { Sidebar } from "@/components/sidebar"
+"use client";
+
+import { useState } from "react";
+import { Search } from "lucide-react";
+import { Sidebar } from "@/components/sidebar";
 
 export default function Dashboard() {
+  const [showNewProtocolModal, setShowNewProtocolModal] = useState(false);
+  const [patients, setPatients] = useState([]);
+
+  const handleAddProtocol = (protocol: {
+    name: string;
+    template: string;
+    patientCount: number;
+  }) => {
+    // Implementation of handleAddProtocol
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
@@ -42,7 +56,10 @@ export default function Dashboard() {
                   <span className="text-gray-500">103/300 Contacted</span>
                 </div>
                 <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: "34%" }}></div>
+                  <div
+                    className="h-full bg-green-500 rounded-full"
+                    style={{ width: "34%" }}
+                  ></div>
                 </div>
               </div>
 
@@ -52,7 +69,10 @@ export default function Dashboard() {
                   <span className="text-gray-500">78/200 Contacted</span>
                 </div>
                 <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-teal-500 rounded-full" style={{ width: "39%" }}></div>
+                  <div
+                    className="h-full bg-teal-500 rounded-full"
+                    style={{ width: "39%" }}
+                  ></div>
                 </div>
               </div>
 
@@ -62,7 +82,10 @@ export default function Dashboard() {
                   <span className="text-gray-500">136/200 Contacted</span>
                 </div>
                 <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-teal-500 rounded-full" style={{ width: "68%" }}></div>
+                  <div
+                    className="h-full bg-teal-500 rounded-full"
+                    style={{ width: "68%" }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -73,7 +96,10 @@ export default function Dashboard() {
             <h2 className="text-lg font-medium mb-4">Data Insights</h2>
 
             <div className="h-40 w-full">
-              <svg viewBox="0 0 400 100" className="w-full h-full stroke-emerald-500 stroke-2 fill-none">
+              <svg
+                viewBox="0 0 400 100"
+                className="w-full h-full stroke-emerald-500 stroke-2 fill-none"
+              >
                 <path
                   d="M0,50 L20,45 L40,60 L60,40 L80,55 L100,35 L120,50 L140,30 L160,45 L180,50 L200,35 L220,55 L240,40 L260,60 L280,45 L300,50 L320,30 L340,55 L360,40 L380,20 L400,10"
                   className="stroke-emerald-500 fill-none"
@@ -95,21 +121,27 @@ export default function Dashboard() {
                 <div className="mt-0.5 w-4 h-4 rounded-full border border-gray-300 flex items-center justify-center">
                   <div className="w-2 h-2 rounded-full"></div>
                 </div>
-                <span className="text-sm">Create New Patient Intake protocol for this quarter</span>
+                <span className="text-sm">
+                  Create New Patient Intake protocol for this quarter
+                </span>
               </div>
 
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 w-4 h-4 rounded-full border border-gray-300 flex items-center justify-center">
                   <div className="w-2 h-2 rounded-full"></div>
                 </div>
-                <span className="text-sm">Update appointment reminders protocol with new patients</span>
+                <span className="text-sm">
+                  Update appointment reminders protocol with new patients
+                </span>
               </div>
 
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 w-4 h-4 rounded-full border border-gray-300 flex items-center justify-center">
                   <div className="w-2 h-2 rounded-full"></div>
                 </div>
-                <span className="text-sm">Remove old or non-existing patients from protocols</span>
+                <span className="text-sm">
+                  Remove old or non-existing patients from protocols
+                </span>
               </div>
             </div>
           </div>
@@ -120,7 +152,10 @@ export default function Dashboard() {
 
             <div className="mb-4 flex items-center gap-2">
               <div className="relative flex-1 max-w-xs">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                <Search
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={16}
+                />
                 <input
                   type="text"
                   placeholder="Search your calls..."
@@ -128,7 +163,14 @@ export default function Dashboard() {
                 />
               </div>
               <button className="p-2 border rounded-md">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M4 6h16M4 12h16M4 18h7" />
                 </svg>
               </button>
@@ -138,10 +180,16 @@ export default function Dashboard() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-gray-500">
-                    <th className="text-left font-medium py-2 px-2">Patient Name</th>
+                    <th className="text-left font-medium py-2 px-2">
+                      Patient Name
+                    </th>
                     <th className="text-left font-medium py-2 px-2">Status</th>
-                    <th className="text-left font-medium py-2 px-2">Protocol</th>
-                    <th className="text-left font-medium py-2 px-2">Duration</th>
+                    <th className="text-left font-medium py-2 px-2">
+                      Protocol
+                    </th>
+                    <th className="text-left font-medium py-2 px-2">
+                      Duration
+                    </th>
                     <th className="text-left font-medium py-2 px-2">Date</th>
                   </tr>
                 </thead>
@@ -188,5 +236,5 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Phone, X, CheckCircle2, User, AlertCircle } from "lucide-react"
-import { makePhoneCall } from "@/services/retellService"
+import { useEffect, useState } from "react";
+import { Phone, X, CheckCircle2, User, AlertCircle } from "lucide-react";
+import { makePhoneCall } from "@/services/retellService";
 
 type CallSimulationModalProps = {
-  patientName: string
-  phoneNumber: string
-  onClose: () => void
-  onCallComplete: (accepted: boolean) => void
-}
+  patientName: string;
+  phoneNumber: string;
+  onClose: () => void;
+  onCallComplete: (accepted: boolean) => void;
+};
 
 export function CallSimulationModal({
   patientName,
@@ -17,70 +17,72 @@ export function CallSimulationModal({
   onClose,
   onCallComplete,
 }: CallSimulationModalProps) {
-  const [callState, setCallState] = useState<"dialing" | "connecting" | "in-progress" | "completed" | "error">(
-    "dialing"
-  )
-  const [callDuration, setCallDuration] = useState(0)
-  const [accepted, setAccepted] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [callState, setCallState] = useState<
+    "dialing" | "connecting" | "in-progress" | "completed" | "error"
+  >("dialing");
+  const [callDuration, setCallDuration] = useState(0);
+  const [accepted, setAccepted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const simulateStatus = async () => {
       try {
-        setCallState("dialing")
-        await new Promise((res) => setTimeout(res, 1000))
+        setCallState("dialing");
+        await new Promise((res) => setTimeout(res, 1000));
 
-        setCallState("connecting")
-        await new Promise((res) => setTimeout(res, 1000))
+        setCallState("connecting");
+        await new Promise((res) => setTimeout(res, 1000));
 
-        const success = await makePhoneCall(phoneNumber)
+        const success = await makePhoneCall(phoneNumber, patientName, "agent_af8d7952b291c293b87a9f6ad8");  
 
         if (success) {
-          setCallState("in-progress")
-          setAccepted(true)
+          setCallState("in-progress");
+          setAccepted(true);
 
           // Let call run for 5 seconds before marking as complete
           setTimeout(() => {
-            setCallState("completed")
-          }, 5000)
+            setCallState("completed");
+          }, 5000);
         } else {
-          throw new Error("Call failed")
+          throw new Error("Call failed");
         }
       } catch (err) {
-        setErrorMessage((err as Error).message || "Call failed")
-        setCallState("error")
+        setErrorMessage((err as Error).message || "Call failed");
+        setCallState("error");
       }
-    }
+    };
 
-    simulateStatus()
-  }, [phoneNumber])
+    simulateStatus();
+  }, [phoneNumber, patientName]);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout
+    let timer: NodeJS.Timeout;
     if (callState === "in-progress") {
       timer = setInterval(() => {
-        setCallDuration((prev) => prev + 1)
-      }, 1000)
+        setCallDuration((prev) => prev + 1);
+      }, 1000);
     }
-    return () => clearInterval(timer)
-  }, [callState])
+    return () => clearInterval(timer);
+  }, [callState]);
 
   useEffect(() => {
     if (callState === "completed" || callState === "error") {
-      const timeout = setTimeout(() => onCallComplete(accepted), 2000)
-      return () => clearTimeout(timeout)
+      const timeout = setTimeout(() => onCallComplete(accepted), 2000);
+      return () => clearTimeout(timeout);
     }
-  }, [callState, accepted, onCallComplete])
+  }, [callState, accepted, onCallComplete]);
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
 
   const handleEndCall = () => {
-    setCallState("completed")
-  }
+    setCallState("completed");
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -88,7 +90,10 @@ export function CallSimulationModal({
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Retell AI Call</h2>
           {callState !== "in-progress" && (
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700"
+            >
               <X size={20} />
             </button>
           )}
@@ -101,14 +106,18 @@ export function CallSimulationModal({
                 <User size={40} className="text-gray-600" />
                 <div
                   className={`absolute inset-0 border-4 border-teal-500 rounded-full ${
-                    callState === "dialing" ? "animate-ping opacity-75" : "animate-pulse"
+                    callState === "dialing"
+                      ? "animate-ping opacity-75"
+                      : "animate-pulse"
                   }`}
                 ></div>
               </div>
               <h3 className="text-xl font-medium mb-2">{patientName}</h3>
               <p className="text-gray-500 mb-6">{phoneNumber}</p>
               <p className="text-gray-600">
-                {callState === "dialing" ? "Dialing..." : "Connecting with Retell AI..."}
+                {callState === "dialing"
+                  ? "Dialing..."
+                  : "Connecting with Retell AI..."}
               </p>
             </>
           )}
@@ -120,8 +129,12 @@ export function CallSimulationModal({
               </div>
               <h3 className="text-xl font-medium mb-2">{patientName}</h3>
               <p className="text-gray-500 mb-2">{phoneNumber}</p>
-              <div className="text-teal-600 font-medium mb-6">Call in progress</div>
-              <div className="text-3xl font-mono">{formatTime(callDuration)}</div>
+              <div className="text-teal-600 font-medium mb-6">
+                Call in progress
+              </div>
+              <div className="text-3xl font-mono">
+                {formatTime(callDuration)}
+              </div>
               <div className="mt-8 flex space-x-4">
                 <button
                   onClick={handleEndCall}
@@ -139,8 +152,12 @@ export function CallSimulationModal({
                 <CheckCircle2 size={40} className="text-green-600" />
               </div>
               <h3 className="text-xl font-medium mb-2">Call Completed</h3>
-              <p className="text-gray-500 mb-2">{patientName} • {formatTime(callDuration)}</p>
-              <div className="text-green-600 font-medium mb-6">Call was successful</div>
+              <p className="text-gray-500 mb-2">
+                {patientName} • {formatTime(callDuration)}
+              </p>
+              <div className="text-green-600 font-medium mb-6">
+                Call was successful
+              </div>
               <p className="text-gray-600 text-center max-w-xs">
                 Retell AI successfully completed the call.
               </p>
@@ -156,7 +173,8 @@ export function CallSimulationModal({
               <p className="text-gray-500 mb-6">{phoneNumber}</p>
               <div className="text-red-600 font-medium mb-2">Error</div>
               <p className="text-gray-600 text-center max-w-xs">
-                {errorMessage || "There was an error making the call. Please try again later."}
+                {errorMessage ||
+                  "There was an error making the call. Please try again later."}
               </p>
             </>
           )}
@@ -174,5 +192,5 @@ export function CallSimulationModal({
         )}
       </div>
     </div>
-  )
+  );
 }
