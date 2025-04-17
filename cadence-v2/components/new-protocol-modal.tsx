@@ -107,24 +107,24 @@ export function NewProtocolModal({
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-2">
                   Protocol Name
                 </label>
                 <input
                   type="text"
                   placeholder="Enter your protocol name"
-                  className="w-full p-2 border rounded-md"
+                  className="w-full p-3 border border-black rounded-md bg-white text-gray-800"
                   value={protocolName}
                   onChange={(e) => setProtocolName(e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-2">
                   Start & End Date
                 </label>
                 <div className="relative">
                   <select
-                    className="w-full p-2 border rounded-md appearance-none"
+                    className="w-full p-3 border border-black rounded-md bg-white text-gray-800"
                     value={dateRange}
                     onChange={(e) => setDateRange(e.target.value)}
                   >
@@ -154,12 +154,12 @@ export function NewProtocolModal({
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-2">
                   Assign Team Members
                 </label>
                 <div className="relative">
                   <select
-                    className="w-full p-2 border rounded-md appearance-none"
+                    className="w-full p-3 border border-black rounded-md bg-white text-gray-800"
                     value={teamMembers}
                     onChange={(e) => setTeamMembers(e.target.value)}
                   >

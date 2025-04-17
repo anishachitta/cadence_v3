@@ -200,7 +200,7 @@ export default function PatientsPage() {
                   <input
                     type="text"
                     placeholder="Search patients..."
-                    className="pl-9 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="pl-9 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary text-gray-600 bg-white"
                   />
                 </div>
                 <button

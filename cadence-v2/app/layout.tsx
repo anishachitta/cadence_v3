@@ -1,14 +1,12 @@
-import type React from "react"
 import "./globals.css"
-import { Inter } from "next/font/google"
+import { DM_Sans } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 
-const inter = Inter({ subsets: ["latin"] })
+const dmSans = DM_Sans({ subsets: ["latin"] })
 
 export const metadata = {
   title: "Cadence - Healthcare Call Management",
-  description: "A dashboard for managing patient calls and protocols",
-  generator: "v0.dev",
+  description: "Healthcare call management dashboard with Retell AI integration",
 }
 
 export default function RootLayout({
@@ -18,11 +16,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${dmSans.className} text-black`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
+          defaultTheme="system"
+          enableSystem
           disableTransitionOnChange
         >
           {children}

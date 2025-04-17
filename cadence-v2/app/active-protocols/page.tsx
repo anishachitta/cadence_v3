@@ -167,7 +167,7 @@ export default function ActiveProtocols() {
                 <input
                   type="text"
                   placeholder="Search your protocols..."
-                  className="pl-9 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="pl-9 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary text-gray-600 bg-white"
                 />
               </div>
               <button className="p-2 border rounded-md">
@@ -183,7 +183,7 @@ export default function ActiveProtocols() {
                 </svg>
               </button>
               <button
-                className="flex items-center gap-2 bg-teal-500 text-white px-3 py-2 rounded-md text-sm"
+                className="flex items-center gap-2 bg-white text-[#1F796E] border border-black px-3 py-2 rounded-md text-sm"
                 onClick={() => setShowModal(true)}
               >
                 <Plus size={16} />
