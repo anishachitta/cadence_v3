@@ -46,7 +46,7 @@ export function AddPatientModal({ onClose, onAddPatient }: AddPatientModalProps)
                 <input
                   type="text"
                   placeholder="Enter patient name"
-                  className="w-full p-2 border rounded-md"
+                  className="w-full p-2 border border-black rounded-md bg-white text-black"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
                   required
@@ -57,7 +57,7 @@ export function AddPatientModal({ onClose, onAddPatient }: AddPatientModalProps)
                 <input
                   type="tel"
                   placeholder="Enter phone number"
-                  className="w-full p-2 border rounded-md"
+                  className="w-full p-2 border border-black rounded-md bg-white text-black"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   required
