@@ -4,9 +4,8 @@ type Patient = {
   id: string;
   name: string;
   status: "Completed" | "Active" | "Draft" | "Called";
-  dob: number | string;
+  dob: string;
   phoneNumber: string;
-  callsCompleted: string;
   successRate: string;
 };
 
@@ -19,31 +18,44 @@ interface PatientStore {
 export const usePatientStore = create<PatientStore>((set) => ({
   patients: [
     {
-      id: "1",
+      id: "123923",
       name: "Anisha Chitta",
-      status: "Completed",
-      dob: 132,
+      status: "Active",
+      dob: "01322004",
       phoneNumber: "+19498129268",
-      callsCompleted: "127/132",
       successRate: "96%",
     },
     {
-      id: "2",
-      name: "John Doe",
+      id: "543239",
+      name: "Bona Suh",
       status: "Active",
-      dob: 132,
+      dob: "02012005",
+      phoneNumber: "+2136569648",
+      successRate: "27%",
+    },
+    {
+      id: "543139",
+      name: "Devin Hayden",
+      status: "Active",
+      dob: "07212004",
       phoneNumber: "+15552345678",
-      callsCompleted: "22/132",
       successRate: "57%",
     },
     {
-      id: "3",
+      id: "375241",
+      name: "Alisha Merchant",
+      status: "Active",
+      dob: "01141984",
+      phoneNumber: "+19343789040",
+      successRate: "40%",
+    },
+    {
+      id: "573244",
       name: "Ashwani Chitta",
       status: "Active",
-      dob: 144,
+      dob: "01141984",
       phoneNumber: "+19493789040",
-      callsCompleted: "-",
-      successRate: "-",
+      successRate: "70%",
     },
   ],
   setPatients: (patients) => set({ patients }),
