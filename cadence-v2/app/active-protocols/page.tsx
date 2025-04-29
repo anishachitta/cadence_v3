@@ -150,7 +150,7 @@ export default function ActiveProtocols() {
   };
 
   return (
-    <div className="flex h-screen bg-[#EFF1F2]">
+    <div className="flex h-screen bg-gray-50">
       <Sidebar />
 
       {/* Main Content */}
