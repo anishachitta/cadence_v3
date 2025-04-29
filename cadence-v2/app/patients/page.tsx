@@ -15,9 +15,8 @@ type Patient = {
   id: string;
   name: string;
   status: "Completed" | "Active" | "Draft" | "Called";
-  dob: number | string;
+  dob: string;
   phoneNumber: string;
-  callsCompleted: string;
   successRate: string;
 };
 
@@ -76,20 +75,15 @@ export default function PatientsPage() {
   ]);
 
   // Function to add a new patient
-  const handleAddPatient = (patientData: {
-    name: string;
-    phoneNumber: string;
-  }) => {
+  const handleAddPatient = (patientData: { name: string; phoneNumber: string }) => {
     const newPatient: Patient = {
       id: Date.now().toString(),
       name: patientData.name,
       status: "Active",
       dob: "-",
       phoneNumber: patientData.phoneNumber,
-      callsCompleted: "0/0",
       successRate: "0%",
     };
-
     setPatients([newPatient, ...patients]);
     setShowAddModal(false);
   };
@@ -99,23 +93,14 @@ export default function PatientsPage() {
     if (callPatient && accepted) {
       // Update patient status and call stats
       setPatients(
-        patients.map((patient) => {
-          if (patient.id === callPatient.id) {
-            const [completed, total] = patient.callsCompleted.split("/");
-            const newCompleted =
-              completed !== "-" ? Number.parseInt(completed) + 1 : 1;
-            const newTotal = total !== "-" ? Number.parseInt(total) + 1 : 1;
-            const successRate =
-              Math.round((newCompleted / newTotal) * 100) + "%";
-
+        patients.map((p) => {
+          if (p.id === callPatient.id) {
             return {
-              ...patient,
+              ...p,
               status: "Called",
-              callsCompleted: `${newCompleted}/${newTotal}`,
-              successRate,
             };
           }
-          return patient;
+          return p;
         })
       );
     }
@@ -149,28 +134,6 @@ export default function PatientsPage() {
       if (response.ok) {
         toast.success(
           `Call initiated to ${patient.name} at ${patient.phoneNumber}`
-        );
-
-        // Update patient status
-        setPatients(
-          patients.map((p) => {
-            if (p.id === patient.id) {
-              const [completed, total] = p.callsCompleted.split("/");
-              const newCompleted =
-                completed !== "-" ? Number.parseInt(completed) + 1 : 1;
-              const newTotal = total !== "-" ? Number.parseInt(total) + 1 : 1;
-              const successRate =
-                Math.round((newCompleted / newTotal) * 100) + "%";
-
-              return {
-                ...p,
-                status: "Called",
-                callsCompleted: `${newCompleted}/${newTotal}`,
-                successRate,
-              };
-            }
-            return p;
-          })
         );
       }
     } catch (error) {

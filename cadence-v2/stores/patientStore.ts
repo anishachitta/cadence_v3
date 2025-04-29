@@ -30,7 +30,7 @@ export const usePatientStore = create<PatientStore>((set) => ({
       name: "Bona Suh",
       status: "Active",
       dob: "02012005",
-      phoneNumber: "+2136569648",
+      phoneNumber: "+12136569648",
       successRate: "27%",
     },
     {
