@@ -58,9 +58,8 @@ export function Sidebar() {
                 href="/active-protocols"
                 className={`block py-1 ${pathname === "/active-protocols" ? "text-teal-600" : ""}`}
               >
-                Active Protocols
+                Voice Agents
               </Link>
-              <div className="py-1">Call Monitor</div>
               <div className="py-1">Transcripts</div>
             </div>
           </div>

@@ -182,7 +182,7 @@ export default function ActiveProtocols() {
       <div className="flex-1 overflow-auto p-6">
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-xl font-semibold">Active Protocols</h1>
+            <h1 className="text-xl font-regular">Voice Agents</h1>
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Search
@@ -195,7 +195,7 @@ export default function ActiveProtocols() {
                   className="pl-9 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary text-gray-600 bg-white"
                 />
               </div>
-              <button className="p-2 border rounded-md">
+              {/* <button className="p-2 border rounded-md">
                 <svg
                   width="16"
                   height="16"
@@ -206,7 +206,7 @@ export default function ActiveProtocols() {
                 >
                   <path d="M4 6h16M4 12h16M4 18h7" />
                 </svg>
-              </button>
+              </button> */}
               <button
                 className="flex items-center gap-2 bg-white text-[#1F796E] border border-black px-3 py-2 rounded-md text-sm"
                 onClick={() => setShowModal(true)}
