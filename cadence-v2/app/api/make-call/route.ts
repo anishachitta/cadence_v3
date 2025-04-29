@@ -34,12 +34,16 @@ export async function POST(request: Request) {
     });
 
     const data = await response.json();
+    console.log('make-call API - response data:', data); // Add debug log
 
     if (!response.ok) {
       throw new Error(data.message || "Call failed");
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true,
+      callId: data.call_id 
+    });
 
   } catch (error) {
     console.error("Error making call:", error);

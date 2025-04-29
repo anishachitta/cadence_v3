@@ -4,10 +4,8 @@ import { useState } from "react";
 import { Grid, List, Plus, Search } from "lucide-react";
 import { NewProtocolModal } from "@/components/new-protocol-modal";
 import { Sidebar } from "@/components/sidebar";
-import { makePhoneCall } from "@/services/retellService";
 import { usePatientStore } from "@/stores/patientStore";
 
-// Define protocol type
 type Protocol = {
   id: string;
   name: string;
@@ -19,7 +17,6 @@ type Protocol = {
   patientIds: string[];
 };
 
-// Add this type and function near the top of the file
 type PatientDetails = {
   id: string;
   phoneNumber: string;
@@ -29,7 +26,6 @@ type PatientDetails = {
 const getPatientDetails = async (
   patientIds: string[]
 ): Promise<PatientDetails[]> => {
-  // Replace this with your actual patient data fetch logic
   const response = await fetch("/api/patients", {
     method: "POST",
     body: JSON.stringify({ patientIds }),
@@ -39,7 +35,6 @@ const getPatientDetails = async (
 
 export default function ActiveProtocols() {
   const [showModal, setShowModal] = useState(false);
-  // Initialize with existing protocols
   const [protocols, setProtocols] = useState<Protocol[]>([
     {
       id: "1",
@@ -73,7 +68,6 @@ export default function ActiveProtocols() {
     },
   ]);
 
-  // Function to add a new protocol
   const handleAddProtocol = (protocolData: {
     name: string;
     template: string;
@@ -93,14 +87,39 @@ export default function ActiveProtocols() {
     };
 
     setProtocols([newProtocol, ...protocols]);
-
-    // Initiate calls for all selected patients
     initiateProtocolCalls(newProtocol);
-
     setShowModal(false);
   };
 
-  // Add this function to handle the automatic calling
+  const pollForTranscript = async (callId: string, patientName: string) => {
+    const maxWaitTimeMs = 5 * 60 * 1000; // 5 minutes
+    const pollingIntervalMs = 5000;
+    const startTime = Date.now();
+  
+    while (Date.now() - startTime < maxWaitTimeMs) {
+      console.log(`Polling for transcript of ${patientName}...`);
+  
+      const response = await fetch("/api/get-transcript", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callId }),
+      });
+  
+      const data = await response.json();
+  
+      if (data.success && data.transcript) {
+        console.log(`✅ Transcript for ${patientName}:`, data.transcript);
+        return; // <-- 🔥 THIS STOPS THE LOOP
+      }
+  
+      await new Promise(res => setTimeout(res, pollingIntervalMs));
+    }
+  
+    console.warn(`❌ Timed out waiting for transcript for ${patientName}.`);
+  };
+  
+  
+
   const initiateProtocolCalls = async (protocol: Protocol) => {
     try {
       const patients = usePatientStore.getState().patients;
@@ -122,7 +141,14 @@ export default function ActiveProtocols() {
         });
 
         if (response.ok) {
-          // Update protocol stats similar to how patient stats are updated
+          const data = await response.json();
+          const callId = data.callId;
+          console.log(`📞 Call started for ${patient.name} (Call ID: ${callId})`);
+
+          // Start polling immediately
+          pollForTranscript(callId, patient.name);
+
+          // Update your protocol call counts
           setProtocols((currentProtocols) =>
             currentProtocols.map((p) => {
               if (p.id === protocol.id) {
@@ -153,7 +179,6 @@ export default function ActiveProtocols() {
     <div className="flex h-screen bg-[#EFF1F2]">
       <Sidebar />
 
-      {/* Main Content */}
       <div className="flex-1 overflow-auto p-6">
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-6">

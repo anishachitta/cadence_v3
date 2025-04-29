@@ -5,7 +5,7 @@ export const makePhoneCall = async (
   phoneNumber: string,
   patientName: string,
   agentId: string
-): Promise<boolean> => {
+): Promise<{ success: boolean; callId?: string }> => {  // Update return type
   console.log('makePhoneCall service - raw agentId:', agentId);
   console.log('makePhoneCall service - typeof agentId:', typeof agentId);
   
@@ -32,9 +32,13 @@ export const makePhoneCall = async (
       throw new Error(data.error || 'Call failed');
     }
 
-    return data.success;
+    // Update return value to include callId
+    return {
+      success: data.success,
+      callId: data.callId
+    };
   } catch (error) {
     console.error('Error in makePhoneCall:', error);
-    return false;
+    return { success: false };
   }
 };
