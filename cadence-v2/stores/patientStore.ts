@@ -6,7 +6,6 @@ type Patient = {
   status: "Completed" | "Active" | "Draft" | "Called";
   dob: number | string;
   phoneNumber: string;
-  callsCompleted: string;
   successRate: string;
 };
 
@@ -24,7 +23,6 @@ export const usePatientStore = create<PatientStore>((set) => ({
       status: "Completed",
       dob: 132,
       phoneNumber: "+19498129268",
-      callsCompleted: "127/132",
       successRate: "96%",
     },
     {
@@ -33,13 +31,9 @@ export const usePatientStore = create<PatientStore>((set) => ({
       status: "Active",
       dob: 132,
       phoneNumber: "+15552345678",
-      callsCompleted: "22/132",
       successRate: "57%",
     },
     {
-<<<<<<< Updated upstream
-      id: "3",
-=======
       id: "375241",
       name: "Alisha Merchant",
       status: "Active",
@@ -49,12 +43,10 @@ export const usePatientStore = create<PatientStore>((set) => ({
     },
     {
       id: "573244",
->>>>>>> Stashed changes
       name: "Ashwani Chitta",
       status: "Active",
       dob: 144,
       phoneNumber: "+19493789040",
-      callsCompleted: "-",
       successRate: "-",
     },
   ],
