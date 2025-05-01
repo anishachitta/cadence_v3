@@ -17,7 +17,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#EFF1F2]">
       <Sidebar />
 
       {/* Main Content */}
@@ -125,8 +125,8 @@ export default function Dashboard() {
                     <path d="M18 15l-6-6-6 6" />
                   </svg>
                   <span className="text-sm text-emerald-500">12.3%</span>
-                </div>
-              </div>
+            </div>
+          </div>
 
               {/* Success Rate */}
               <div className="bg-white p-4 rounded-lg border">

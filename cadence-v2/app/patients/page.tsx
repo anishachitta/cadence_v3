@@ -180,7 +180,7 @@ export default function PatientsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#EFF1F2]">
       <Sidebar />
       <Toaster position="top-right" />
 
@@ -190,7 +190,7 @@ export default function PatientsPage() {
           {/* Patients Section */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-xl font-semibold">Patients</h1>
+              <h4 className="text-xl font-regular">Patients</h4>
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <Search
@@ -213,26 +213,26 @@ export default function PatientsPage() {
               </div>
             </div>
 
-            <div className="mb-6 flex justify-between items-center">
-              <div className="flex">
-                <button className="px-4 py-2 text-sm font-medium bg-gray-200 rounded-l-md">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex border border-[#6B7A87] rounded-lg overflow-hidden">
+                <button className="m-1 px-2 py-0.5 text-sm rounded-sm focus:outline-none transition-colors bg-[#6B7A87] text-white">
                   All Patients
                 </button>
-                <button className="px-4 py-2 text-sm font-medium text-gray-500 border-y border-r">
+                <button className="px-5 py-2 text-sm focus:outline-none transition-colors text-black bg-white border-0">
                   Active
                 </button>
-                <button className="px-4 py-2 text-sm font-medium text-gray-500 border-y border-r">
+                <button className="px-5 py-2 text-sm focus:outline-none transition-colors text-black bg-white border-0">
                   Inactive
                 </button>
-                <button className="px-4 py-2 text-sm font-medium text-gray-500 border-y border-r rounded-r-md">
+                <button className="px-5 py-2 text-sm rounded-r-lg focus:outline-none transition-colors text-black bg-white border-0">
                   Drafts
                 </button>
               </div>
-              <div className="flex border rounded-md">
-                <button className="p-2 border-r">
+              <div className="flex gap-2 ml-2">
+                <button className="p-2 border border-[#6B7A87] rounded-md bg-white">
                   <List size={16} />
                 </button>
-                <button className="p-2">
+                <button className="p-2 border border-[#6B7A87] rounded-md bg-white">
                   <Grid size={16} />
                 </button>
               </div>
@@ -241,57 +241,29 @@ export default function PatientsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left border-b text-gray-500">
-                    <th className="py-3 px-4 font-medium">Patient Name</th>
-                    <th className="py-3 px-4 font-medium">Status</th>
-                    <th className="py-3 px-4 font-medium">DOB</th>
-                    <th className="py-3 px-4 font-medium">Phone Number</th>
-                    <th className="py-3 px-4 font-medium">Calls Completed</th>
-                    <th className="py-3 px-4 font-medium">Success Rate</th>
-                    <th className="py-3 px-4 font-medium">Actions</th>
+                  <tr className="border-b text-gray-500" style={{ borderColor: '#EFF1F2' }}>
+                    <th className="py-3 px-4 font-medium text-left">Patient Name</th>
+                    <th className="py-3 px-4 font-medium text-center">Status</th>
+                    <th className="py-3 px-4 font-medium text-center">DOB</th>
+                    <th className="py-3 px-4 font-medium text-center">Patient ID #</th>
+                    <th className="py-3 px-4 font-medium text-center">Success Rate</th>
                   </tr>
                 </thead>
                 <tbody>
                   {patients.map((patient) => (
-                    <tr key={patient.id} className="border-b">
-                      <td className="py-4 px-4">{patient.name}</td>
-                      <td className="py-4 px-4">
+                    <tr key={patient.id} className="border-b" style={{ borderColor: '#EFF1F2' }}>
+                      <td className="py-3 px-3 text-sm text-left">{patient.name}</td>
+                      <td className="py-1 px-1 text-sm text-center">
                         <span
-                          className={`px-2 py-1 rounded-md text-xs ${
-                            patient.status === "Active"
-                              ? "bg-blue-100 text-blue-800"
-                              : patient.status === "Completed"
-                              ? "bg-teal-100 text-teal-800"
-                              : patient.status === "Called"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
+                          className="px-6 py-1 rounded-md text-black text-sm font-normal inline-block text-center"
+                          style={{ minWidth: '80px', backgroundColor: '#F1FFFA', border: '1px solid #1F796E' }}
                         >
                           {patient.status}
                         </span>
                       </td>
-                      <td className="py-4 px-4">{patient.dob}</td>
-                      <td className="py-4 px-4">{patient.phoneNumber}</td>
-                      <td className="py-4 px-4">{patient.callsCompleted}</td>
-                      <td className="py-4 px-4">{patient.successRate}</td>
-                      <td className="py-4 px-4 flex gap-2">
-                        <button
-                          onClick={() => setCallPatient(patient)}
-                          className="p-2 text-teal-600 hover:bg-teal-50 rounded-full transition-colors"
-                          title="Call patient with simulation"
-                        >
-                          <Phone size={16} />
-                        </button>
-                        {hasConfig && (
-                          <button
-                            onClick={() => handleDirectCall(patient)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                            title="Call patient with Retell API"
-                          >
-                            <Phone size={16} />
-                          </button>
-                        )}
-                      </td>
+                      <td className="py-3 px-3 text-sm text-center">{patient.dob}</td>
+                      <td className="py-3 px-3 text-sm text-center">{patient.id}</td>
+                      <td className="py-3 px-3 text-sm text-center">{patient.successRate}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -302,22 +274,22 @@ export default function PatientsPage() {
           {/* Flags & Warnings Section */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Flags & Warnings</h2>
+              <h2 className="text-xl ">Flags & Warnings</h2>
               <button className="px-3 py-1 border rounded-md text-sm">
                 View All
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <div className="mb-2 px-2 py-1 bg-gray-100 rounded-md inline-block text-sm">
+                <div className="mb-2 px-2 py-1 bg-red-500 rounded-md inline-block text-sm text-white">
                   High Priority
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3 py-3">
                   {flags
                     .filter((flag) => flag.priority === "High")
                     .map((flag) => (
-                      <div key={flag.id} className="p-4 border rounded-md">
+                      <div key={flag.id} className="p-3 border rounded-md w-61">
                         <p>{flag.message}</p>
                       </div>
                     ))}
@@ -328,7 +300,7 @@ export default function PatientsPage() {
                 <div className="mb-2 px-2 py-1 bg-gray-100 rounded-md inline-block text-sm">
                   Moderate Priority
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3 py-3">
                   {flags
                     .filter((flag) => flag.priority === "Moderate")
                     .map((flag) => (
@@ -343,7 +315,7 @@ export default function PatientsPage() {
                 <div className="mb-2 px-2 py-1 bg-gray-100 rounded-md inline-block text-sm">
                   Low Priority
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3 py-3">
                   {flags
                     .filter((flag) => flag.priority === "Low")
                     .map((flag) => (
