@@ -5,6 +5,7 @@ import { Grid, List, Plus, Search } from "lucide-react";
 import { NewProtocolModal } from "@/components/new-protocol-modal";
 import { Sidebar } from "@/components/sidebar";
 import { usePatientStore } from "@/stores/patientStore";
+import { useRouter } from "next/navigation";
 
 type Protocol = {
   id: string;
@@ -35,6 +36,7 @@ const getPatientDetails = async (
 
 export default function ActiveProtocols() {
   const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
   const [protocols, setProtocols] = useState<Protocol[]>([
     {
       id: "1",
@@ -213,6 +215,13 @@ export default function ActiveProtocols() {
               >
                 <Plus size={16} />
                 <span>New Protocol</span>
+              </button>
+              <button
+                className="flex items-center gap-2 bg-white text-[#1F796E] border border-black px-3 py-2 rounded-md text-sm"
+                onClick={() => router.push("/new-agent")}
+              >
+                <Plus size={16} />
+                <span>New Agent</span>
               </button>
             </div>
           </div>
