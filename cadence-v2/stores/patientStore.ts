@@ -37,7 +37,19 @@ export const usePatientStore = create<PatientStore>((set) => ({
       successRate: "57%",
     },
     {
+<<<<<<< Updated upstream
       id: "3",
+=======
+      id: "375241",
+      name: "Alisha Merchant",
+      status: "Active",
+      dob: "01141984",
+      phoneNumber: "+12014684556",
+      successRate: "40%",
+    },
+    {
+      id: "573244",
+>>>>>>> Stashed changes
       name: "Ashwani Chitta",
       status: "Active",
       dob: 144,
