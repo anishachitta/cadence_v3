@@ -50,27 +50,27 @@ export default function PatientsPage() {
   const [flags, setFlags] = useState<Flag[]>([
     {
       id: "1",
-      patientName: "John Doe",
-      message: "John Doe has missed 3 appointments in the past month.",
+      patientName: "Bona Suh",
+      message: "Bona Suh has missed 5 appointments in the past month.",
       priority: "High",
     },
     {
       id: "2",
-      patientName: "John Doe",
-      message: "John Doe has missed 3 appointments in the past month.",
+      patientName: "Alisha Merchant",
+      message: "Alisha Merchant has missed 3 appointments in the past month.",
       priority: "Moderate",
     },
     {
       id: "3",
-      patientName: "John Doe",
-      message: "John Doe has missed 3 appointments in the past month.",
+      patientName: "Devin Hayden",
+      message: "Devin Hayden has missed 1 appointment in the past month.",
       priority: "Low",
     },
     {
       id: "4",
-      patientName: "John Doe",
-      message: "John Doe has missed 3 appointments in the past month.",
-      priority: "High",
+      patientName: "Ashwani Chitta",
+      message: "Ashwani Chitta has missed 2 appointment in the past month.",
+      priority: "Moderate",
     },
   ]);
 
@@ -167,7 +167,7 @@ export default function PatientsPage() {
                   />
                 </div>
                 <button
-                  className="flex items-center gap-2 bg-teal-500 text-white px-3 py-2 rounded-md text-sm"
+                  className="flex items-center gap-2 bg-white text-[#1F796E] border border-black px-3 py-2 rounded-md text-sm"
                   onClick={() => setShowAddModal(true)}
                 >
                   <Plus size={16} />

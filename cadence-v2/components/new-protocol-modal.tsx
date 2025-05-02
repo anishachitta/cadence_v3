@@ -50,7 +50,7 @@ export function NewProtocolModal({
       name: "Onboarding Survey",
       description:
         "Standardized patient onboarding survey for collecting personal information",
-      agentId: "agent_27bb2484a5c860a93334a5ce62",
+      agentId: "agent_64913079bea9be785f696a6399",
     },
     {
       id: "followup",
