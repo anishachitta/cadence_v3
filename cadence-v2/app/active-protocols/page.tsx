@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Grid, List, Plus, Search } from "lucide-react";
-import { NewProtocolModal } from "@/components/new-protocol-modal";
 import { Sidebar } from "@/components/sidebar";
 import { usePatientStore } from "@/stores/patientStore";
 import { useRouter } from "next/navigation";
+import { useProtocolStore } from "@/stores/protocolStore";
 
 type Protocol = {
   id: string;
@@ -37,61 +37,8 @@ const getPatientDetails = async (
 export default function ActiveProtocols() {
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
-  const [protocols, setProtocols] = useState<Protocol[]>([
-    {
-      id: "1",
-      name: "Insurance Policy Updates",
-      status: "Completed",
-      patientsEnrolled: 132,
-      callsCompleted: "127/132",
-      successRate: "96%",
-      agentId: "agent_onboarding_123",
-      patientIds: ["patient_1", "patient_2", "patient_3"],
-    },
-    {
-      id: "2",
-      name: "Appointment Reminders",
-      status: "Active",
-      patientsEnrolled: 132,
-      callsCompleted: "22/132",
-      successRate: "57%",
-      agentId: "agent_followup_456",
-      patientIds: ["patient_4", "patient_5", "patient_6"],
-    },
-    {
-      id: "3",
-      name: "Clinic Feedback Survey",
-      status: "Draft",
-      patientsEnrolled: 0,
-      callsCompleted: "-",
-      successRate: "-",
-      agentId: "",
-      patientIds: [],
-    },
-  ]);
-
-  const handleAddProtocol = (protocolData: {
-    name: string;
-    template: string;
-    patientCount: number;
-    agentId: string;
-    patientIds: string[];
-  }) => {
-    const newProtocol: Protocol = {
-      id: Date.now().toString(),
-      name: protocolData.name,
-      status: "Active",
-      patientsEnrolled: protocolData.patientCount,
-      callsCompleted: `0/${protocolData.patientCount}`,
-      successRate: "0%",
-      agentId: protocolData.agentId,
-      patientIds: protocolData.patientIds,
-    };
-
-    setProtocols([newProtocol, ...protocols]);
-    initiateProtocolCalls(newProtocol);
-    setShowModal(false);
-  };
+  const protocols = useProtocolStore((state) => state.protocols);
+  const clearProtocols = useProtocolStore((state) => state.clearProtocols);
 
   const pollForTranscript = async (callId: string, patientName: string) => {
     const maxWaitTimeMs = 5 * 60 * 1000; // 5 minutes
@@ -122,61 +69,6 @@ export default function ActiveProtocols() {
   
   
 
-  const initiateProtocolCalls = async (protocol: Protocol) => {
-    try {
-      const patients = usePatientStore.getState().patients;
-      const selectedPatients = patients.filter((p) =>
-        protocol.patientIds.includes(p.id)
-      );
-
-      for (const patient of selectedPatients) {
-        const response = await fetch("/api/make-call", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            toNumber: patient.phoneNumber,
-            patientName: patient.name,
-            agentId: protocol.agentId,
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const callId = data.callId;
-          console.log(`📞 Call started for ${patient.name} (Call ID: ${callId})`);
-
-          // Start polling immediately
-          pollForTranscript(callId, patient.name);
-
-          // Update your protocol call counts
-          setProtocols((currentProtocols) =>
-            currentProtocols.map((p) => {
-              if (p.id === protocol.id) {
-                const [completed, total] = p.callsCompleted.split("/");
-                const newCompleted =
-                  completed !== "-" ? Number.parseInt(completed) + 1 : 1;
-                const newTotal = total !== "-" ? Number.parseInt(total) : 1;
-                const successRate =
-                  Math.round((newCompleted / newTotal) * 100) + "%";
-
-                return {
-                  ...p,
-                  callsCompleted: `${newCompleted}/${newTotal}`,
-                  successRate,
-                };
-              }
-              return p;
-            })
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Failed to initiate calls:", error);
-    }
-  };
-
   return (
     <div className="flex h-screen bg-[#EFF1F2]">
       <Sidebar />
@@ -193,7 +85,7 @@ export default function ActiveProtocols() {
                 />
                 <input
                   type="text"
-                  placeholder="Search your protocols..."
+                  placeholder="Search your agents..."
                   className="pl-9 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary text-gray-600 bg-white"
                 />
               </div>
@@ -209,13 +101,7 @@ export default function ActiveProtocols() {
                   <path d="M4 6h16M4 12h16M4 18h7" />
                 </svg>
               </button> */}
-              <button
-                className="flex items-center gap-2 bg-white text-[#1F796E] border border-black px-3 py-2 rounded-md text-sm"
-                onClick={() => setShowModal(true)}
-              >
-                <Plus size={16} />
-                <span>New Protocol</span>
-              </button>
+
               <button
                 className="flex items-center gap-2 bg-white text-[#1F796E] border border-black px-3 py-2 rounded-md text-sm"
                 onClick={() => router.push("/new-agent")}
@@ -223,13 +109,19 @@ export default function ActiveProtocols() {
                 <Plus size={16} />
                 <span>New Agent</span>
               </button>
+              <button
+                className="flex items-center gap-2 bg-white text-red-600 border border-black px-3 py-2 rounded-md text-sm"
+                onClick={clearProtocols}
+              >
+                <span>Clear All</span>
+              </button>
             </div>
           </div>
 
           <div className="mb-6">
             <div className="flex border-b">
               <button className="px-4 py-2 text-sm font-medium border-b-2 border-gray-900">
-                All Protocols
+                All Agents
               </button>
               <button className="px-4 py-2 text-sm font-medium text-gray-500">
                 Active
@@ -255,7 +147,7 @@ export default function ActiveProtocols() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left border-b text-gray-500">
-                  <th className="py-3 px-4 font-medium">Protocol Name</th>
+                  <th className="py-3 px-4 font-medium">Agent Name</th>
                   <th className="py-3 px-4 font-medium">Status</th>
                   <th className="py-3 px-4 font-medium">Patients Enrolled</th>
                   <th className="py-3 px-4 font-medium">Calls Completed</th>
@@ -290,12 +182,12 @@ export default function ActiveProtocols() {
         </div>
       </div>
 
-      {showModal && (
-        <NewProtocolModal
-          onClose={() => setShowModal(false)}
-          onAddProtocol={handleAddProtocol}
-        />
-      )}
+      {/*
+      <NewProtocolModal
+        onClose={() => setShowModal(false)}
+        onAddProtocol={() => {}}
+      />
+      */}
     </div>
   );
 }

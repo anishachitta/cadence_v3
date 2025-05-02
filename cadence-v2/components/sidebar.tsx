@@ -73,12 +73,6 @@ export function Sidebar() {
             <Users size={18} />
             <span>Patients</span>
           </Link>
-
-          <button className="flex items-center gap-3 w-full p-2 rounded-md text-gray-700 hover:bg-gray-100">
-            <BarChart3 size={18} />
-            <span>Data & Insights</span>
-          </button>
-
           <button className="flex items-center gap-3 w-full p-2 rounded-md text-gray-700 hover:bg-gray-100">
             <Settings size={18} />
             <span>Settings</span>
