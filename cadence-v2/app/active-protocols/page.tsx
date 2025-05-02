@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Grid, List, Plus, Search } from "lucide-react";
 import { Sidebar } from "@/components/sidebar";
 import { usePatientStore } from "@/stores/patientStore";
+import { useCallHistoryStore } from "@/stores/callHistoryStore";
+import { useTranscriptStore } from "@/stores/useTranscriptStore";
 import { useRouter } from "next/navigation";
 import { useProtocolStore } from "@/stores/protocolStore";
 
@@ -24,55 +26,191 @@ type PatientDetails = {
   name: string;
 };
 
-const getPatientDetails = async (
-  patientIds: string[]
-): Promise<PatientDetails[]> => {
-  const response = await fetch("/api/patients", {
-    method: "POST",
-    body: JSON.stringify({ patientIds }),
-  });
-  return response.json();
-};
-
 export default function ActiveProtocols() {
+  const addToCallHistory = useCallHistoryStore(
+    (state) => state.addToCallHistory
+  );
+  const addTranscript = useTranscriptStore.getState().addTranscript;
+  const setProtocols = useProtocolStore((state) => state.setProtocols);
+
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
   const protocols = useProtocolStore((state) => state.protocols);
   const clearProtocols = useProtocolStore((state) => state.clearProtocols);
 
-  const pollForTranscript = async (callId: string, patientName: string) => {
-    const maxWaitTimeMs = 5 * 60 * 1000; // 5 minutes
+  const pollForTranscript = async (
+    callId: string,
+    patientName: string,
+    protocolName: string
+  ) => {
+    const maxWaitTimeMs = 5 * 60 * 1000;
     const pollingIntervalMs = 5000;
     const startTime = Date.now();
-  
+
     while (Date.now() - startTime < maxWaitTimeMs) {
-      console.log(`Polling for transcript of ${patientName}...`);
-  
+      console.log(`📡 Polling for transcript of ${patientName}...`);
+
       const response = await fetch("/api/get-transcript", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ callId }),
       });
-  
+
       const data = await response.json();
-  
+      const timestamp = new Date().toLocaleString("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
+
       if (data.success && data.transcript) {
         console.log(`✅ Transcript for ${patientName}:`, data.transcript);
-        return; // <-- 🔥 THIS STOPS THE LOOP
+
+        addTranscript({
+          id: callId,
+          callId,
+          protocolName,
+          patientName,
+          date: timestamp,
+          status: "Available",
+        });
+        return;
       }
-  
-      await new Promise(res => setTimeout(res, pollingIntervalMs));
+
+      if (data.call_status === "ended") {
+        console.warn(
+          `❌ Call for ${patientName} ended but no transcript was found.`
+        );
+
+        addTranscript({
+          id: callId,
+          callId,
+          protocolName,
+          patientName,
+          date: timestamp,
+          status: "Pending",
+        });
+        return;
+      }
+
+      await new Promise((res) => setTimeout(res, pollingIntervalMs));
     }
-  
-    console.warn(`❌ Timed out waiting for transcript for ${patientName}.`);
+
+    const timestamp = new Date().toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+    addTranscript({
+      id: callId,
+      callId,
+      protocolName,
+      patientName,
+      date: timestamp,
+      status: "Failed",
+    });
   };
-  
-  
+
+  const pollForCallEnd = async (
+    callId: string,
+    patientName: string,
+    protocolName: string,
+    addToCallHistory: (row: any) => void
+  ) => {
+    const pollingIntervalMs = 5000;
+    const timeout = Date.now() + 5 * 60 * 1000;
+
+    while (Date.now() < timeout) {
+      const res = await fetch("/api/get-call-info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callId }),
+      });
+
+      const data = await res.json();
+
+      if (data.call_status === "ended") {
+        console.log("✅ Call ended:", data);
+
+        addToCallHistory({
+          name: patientName,
+          status:
+            data.disconnection_reason === "agent_hangup"
+              ? "Completed"
+              : "Declined",
+          protocol: protocolName,
+          duration: data.readable_duration,
+          date: data.timestamp,
+        });
+
+        return;
+      }
+
+      await new Promise((r) => setTimeout(r, pollingIntervalMs));
+    }
+
+    console.warn(`⌛ Timeout waiting for call ${callId} to end`);
+  };
+
+  const initiateProtocolCalls = async (protocol: Protocol) => {
+    try {
+      const patients = usePatientStore.getState().patients;
+      const selectedPatients = patients.filter((p) =>
+        protocol.patientIds.includes(p.id)
+      );
+
+      for (const patient of selectedPatients) {
+        const response = await fetch("/api/make-call", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            toNumber: patient.phoneNumber,
+            patientName: patient.name,
+            agentId: protocol.agentId,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const callId = data.callId;
+
+          console.log(
+            `📞 Call started for ${patient.name} (Call ID: ${callId})`
+          );
+
+          pollForTranscript(callId, patient.name, protocol.name);
+          pollForCallEnd(callId, patient.name, protocol.name, addToCallHistory);
+
+          const currentProtocols = useProtocolStore.getState().protocols;
+
+          const updatedProtocols = currentProtocols.map((p) => {
+            if (p.id === protocol.id) {
+              const [completed, total] = p.callsCompleted.split("/");
+              const newCompleted =
+                completed !== "-" ? parseInt(completed) + 1 : 1;
+              const newTotal = total !== "-" ? parseInt(total) : 1;
+              const successRate =
+                Math.round((newCompleted / newTotal) * 100) + "%";
+
+              return {
+                ...p,
+                callsCompleted: `${newCompleted}/${newTotal}`,
+                successRate,
+              };
+            }
+            return p;
+          });
+
+          setProtocols(updatedProtocols);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to initiate calls:", error);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-[#EFF1F2]">
       <Sidebar />
-
       <div className="flex-1 overflow-auto p-6">
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-6">
@@ -89,18 +227,13 @@ export default function ActiveProtocols() {
                   className="pl-9 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary text-gray-600 bg-white"
                 />
               </div>
-              {/* <button className="p-2 border rounded-md">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M4 6h16M4 12h16M4 18h7" />
-                </svg>
-              </button> */}
+
+              <button className="p-2 border rounded-md">
+                <List size={16} />
+              </button>
+              <button className="p-2 border rounded-md">
+                <Grid size={16} />
+              </button>
 
               <button
                 className="flex items-center gap-2 bg-white text-[#1F796E] border border-black px-3 py-2 rounded-md text-sm"

@@ -29,8 +29,16 @@ export const usePatientStore = create<PatientStore>((set) => ({
       id: "2",
       name: "Bona Suh",
       status: "Active",
-      dob: 132,
+      dob: "02012005",
       phoneNumber: "+12136569648",
+      successRate: "27%",
+    },
+    {
+      id: "543139",
+      name: "Devin Hayden",
+      status: "Active",
+      dob: "07212004",
+      phoneNumber: "+15552345678",
       successRate: "57%",
     },
     {
