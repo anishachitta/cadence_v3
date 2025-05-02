@@ -5,7 +5,7 @@ import { Grid, List, Plus, Search } from "lucide-react";
 import { Sidebar } from "@/components/sidebar";
 import { usePatientStore } from "@/stores/patientStore";
 import { useCallHistoryStore } from "@/stores/callHistoryStore";
-import { useTranscriptStore } from "@/stores/useTranscriptStore";
+import { transcriptStore } from "@/stores/useTranscriptStore";
 import { useRouter } from "next/navigation";
 import { useProtocolStore } from "@/stores/protocolStore";
 
@@ -30,7 +30,7 @@ export default function ActiveProtocols() {
   const addToCallHistory = useCallHistoryStore(
     (state) => state.addToCallHistory
   );
-  const addTranscript = useTranscriptStore.getState().addTranscript;
+  const addTranscript = transcriptStore.getState().addTranscript;
   const setProtocols = useProtocolStore((state) => state.setProtocols);
 
   const [showModal, setShowModal] = useState(false);

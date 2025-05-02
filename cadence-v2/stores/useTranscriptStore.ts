@@ -1,5 +1,6 @@
 // stores/useTranscriptStore.ts
-import { create } from "zustand";
+import { createStore } from "zustand/vanilla";
+import { useStore } from "zustand";
 
 export type TranscriptRow = {
   id: string;
@@ -8,7 +9,7 @@ export type TranscriptRow = {
   patientName: string;
   date: string;
   status: "Available" | "Pending" | "Failed";
-  content?: string; // added for fetched content
+  content?: string;
 };
 
 type TranscriptStore = {
@@ -16,7 +17,8 @@ type TranscriptStore = {
   addTranscript: (row: TranscriptRow) => void;
 };
 
-export const useTranscriptStore = create<TranscriptStore>((set) => ({
+// ✅ Create vanilla store
+export const transcriptStore = createStore<TranscriptStore>((set) => ({
   transcripts: [],
   addTranscript: (row) =>
     set((state) => {
@@ -24,3 +26,8 @@ export const useTranscriptStore = create<TranscriptStore>((set) => ({
       return { transcripts: [row, ...state.transcripts] };
     }),
 }));
+
+// ✅ React hook to use in components
+export const useTranscriptStore = <T>(
+  selector: (state: TranscriptStore) => T
+) => useStore(transcriptStore, selector);

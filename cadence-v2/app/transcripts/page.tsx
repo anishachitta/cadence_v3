@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
-import { useTranscriptStore } from "@/stores/useTranscriptStore";
+import { useTranscriptStore, transcriptStore } from "@/stores/useTranscriptStore";
 
 export default function TranscriptsPage() {
   const [search, setSearch] = useState("");
@@ -14,7 +14,7 @@ export default function TranscriptsPage() {
 
   useEffect(() => {
     if (hasInitialized.current) return;
-    useTranscriptStore.getState().addTranscript({
+    transcriptStore.getState().addTranscript({
       id: "1",
       callId: "fake-call-id-1",
       protocolName: "Appointment Reminder",
