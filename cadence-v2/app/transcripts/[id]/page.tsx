@@ -60,10 +60,12 @@ export default function TranscriptDetailPage() {
           const isRed = block.includes("🟥") || block.includes("Red Flag");
           const colorClass = isRed ? "bg-red-200" : "bg-yellow-200";
 
-          const quoteMatch = block.match(/• Quote:\s*"([^"]+)"/);
-          if (!quoteMatch) continue;
-
-          const quote = quoteMatch[1];
+          const quoteMatch = block.match(/• Quote:\s*(?:"([^"]+)"|(.+))/);
+          const quote = quoteMatch?.[1] ?? quoteMatch?.[2];
+          if (!quote) {
+            console.warn("⚠️ Quote not found in block:", block);
+            continue;
+          }
           const escaped = quote.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
           const quoteRegex = new RegExp(escaped, "g");
 
