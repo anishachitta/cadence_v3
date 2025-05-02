@@ -27,8 +27,11 @@ type PatientDetails = {
 };
 
 export default function ActiveProtocols() {
-  const addToCallHistory = useCallHistoryStore((state) => state.addToCallHistory);
+  const addToCallHistory = useCallHistoryStore(
+    (state) => state.addToCallHistory
+  );
   const addTranscript = useTranscriptStore.getState().addTranscript;
+  const setProtocols = useProtocolStore((state) => state.setProtocols);
 
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
@@ -74,7 +77,9 @@ export default function ActiveProtocols() {
       }
 
       if (data.call_status === "ended") {
-        console.warn(`❌ Call for ${patientName} ended but no transcript was found.`);
+        console.warn(
+          `❌ Call for ${patientName} ended but no transcript was found.`
+        );
 
         addTranscript({
           id: callId,
@@ -128,7 +133,10 @@ export default function ActiveProtocols() {
 
         addToCallHistory({
           name: patientName,
-          status: data.disconnection_reason === "agent_hangup" ? "Completed" : "Declined",
+          status:
+            data.disconnection_reason === "agent_hangup"
+              ? "Completed"
+              : "Declined",
           protocol: protocolName,
           duration: data.readable_duration,
           date: data.timestamp,
@@ -142,7 +150,6 @@ export default function ActiveProtocols() {
 
     console.warn(`⌛ Timeout waiting for call ${callId} to end`);
   };
-
 
   const initiateProtocolCalls = async (protocol: Protocol) => {
     try {
@@ -166,35 +173,40 @@ export default function ActiveProtocols() {
           const data = await response.json();
           const callId = data.callId;
 
-          console.log(`📞 Call started for ${patient.name} (Call ID: ${callId})`);
+          console.log(
+            `📞 Call started for ${patient.name} (Call ID: ${callId})`
+          );
 
           pollForTranscript(callId, patient.name, protocol.name);
           pollForCallEnd(callId, patient.name, protocol.name, addToCallHistory);
 
-          setProtocols((currentProtocols) =>
-            currentProtocols.map((p) => {
-              if (p.id === protocol.id) {
-                const [completed, total] = p.callsCompleted.split("/");
-                const newCompleted = completed !== "-" ? parseInt(completed) + 1 : 1;
-                const newTotal = total !== "-" ? parseInt(total) : 1;
-                const successRate = Math.round((newCompleted / newTotal) * 100) + "%";
+          const currentProtocols = useProtocolStore.getState().protocols;
 
-                return {
-                  ...p,
-                  callsCompleted: `${newCompleted}/${newTotal}`,
-                  successRate,
-                };
-              }
-              return p;
-            })
-          );
+          const updatedProtocols = currentProtocols.map((p) => {
+            if (p.id === protocol.id) {
+              const [completed, total] = p.callsCompleted.split("/");
+              const newCompleted =
+                completed !== "-" ? parseInt(completed) + 1 : 1;
+              const newTotal = total !== "-" ? parseInt(total) : 1;
+              const successRate =
+                Math.round((newCompleted / newTotal) * 100) + "%";
+
+              return {
+                ...p,
+                callsCompleted: `${newCompleted}/${newTotal}`,
+                successRate,
+              };
+            }
+            return p;
+          });
+
+          setProtocols(updatedProtocols);
         }
       }
     } catch (error) {
       console.error("Failed to initiate calls:", error);
     }
   };
-
 
   return (
     <div className="flex h-screen bg-[#EFF1F2]">
@@ -238,7 +250,6 @@ export default function ActiveProtocols() {
               </button>
             </div>
           </div>
-
 
           <div className="mb-6">
             <div className="flex border-b">
