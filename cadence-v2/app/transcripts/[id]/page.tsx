@@ -116,9 +116,14 @@ export default function TranscriptDetailPage() {
           </div>
 
           {/* Insights Grid */}
-          {(redInsights.length > 0 || yellowInsights.length > 0) && (
-            <div className="mt-6">
-              <h2 className="text-md font-medium mb-4">Insights</h2>
+          <div className="mt-6">
+            <h2 className="text-md font-medium mb-4">Insights</h2>
+
+            {redInsights.length === 0 && yellowInsights.length === 0 ? (
+              <div className="bg-green-100 border border-green-300 text-green-900 p-4 rounded-md text-sm whitespace-pre-wrap">
+                ✅ No clinical concerns or deviations detected.
+              </div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Red Flags */}
                 <div className="space-y-4">
@@ -144,8 +149,8 @@ export default function TranscriptDetailPage() {
                   ))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -13,21 +13,24 @@ export async function POST(req: NextRequest) {
     const prompt = `
 You are a clinical assistant reviewing a transcript between a healthcare agent and a patient. Identify and output a list of potential healthcare flags based on the transcript.
 
-For each concern you find, return a bullet point with:
+For each **individual** concern you find, return a separate bullet point with:
 - Flag level: Red Flag (high risk) or Yellow Flag (moderate risk)
 - Short reason: why it’s flagged
-- The exact quote: the statement from the transcript
+- The exact quote: the single sentence or phrase from the transcript
 - (Optional) a brief suggestion for follow-up
 
-Only list each concern once — even if multiple issues are raised in one sentence, split them out.
+⚠️ Do **not** combine multiple concerns into one entry. Even if they are from the same speaker or sentence, **split them into separate blocks**. This helps your supervising nurse scan each issue clearly.
 
-Format the response as:
+Use this exact format (repeat this block for each issue):
 ---
 🟥 Red Flag  
 • Reason:  
 • Quote:  
 • Suggestion:  
 
+or
+
+---
 🟡 Yellow Flag  
 • Reason:  
 • Quote:  
